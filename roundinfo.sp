@@ -89,7 +89,7 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 
 		//Print Round Info
 		//CPrintToChatAll("{mediumpurple}[Quindali Pugs]{default} Current score: {blue}%s{default} %i, {red}%s{default} %i.", bluName, GetTeamScore(BLU_ID), redName, GetTeamScore(RED_ID));
-		CPrintToChatAll("{%s}[%s]{default} Current score: {blue}%s{default} {%s}%i{default}, {red}%s{default} {%s}%i{default}.", mcolor, btext, bluName, mcolor, GetTeamScore(BLU_ID), redName, mcolor, GetTeamScore(RED_ID));
+		CPrintToChatAll("{%s}[%s]{default} Current score: {blue}%s{default} {%s}%i{default}, {red}%s{default} {%s}%i{default}.", bcolor, btext, bluName, mcolor, GetTeamScore(BLU_ID), redName, mcolor, GetTeamScore(RED_ID));
 
 		//Print Timeleft and Round number IF NOT KOTH
 		//TODO Current Round visible if KOTH?
