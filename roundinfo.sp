@@ -28,8 +28,6 @@ ConVar g_MiscColor;
 bool roundLive = false;
 int currentRound = 0;
 
-//const String bracketText = "QUINDALI PUGS";
-
 /* OnPluginStart()
  * 
  * Called when plugin is loaded
@@ -47,6 +45,8 @@ public void OnPluginStart() {
 	g_BracketText = CreateConVar("sm_roundinfo_btext", "Round Info", "Overrides the plugin name in the bracketed text.");
 	g_BracketColor = CreateConVar("sm_roundinfo_bcolor", "green", "Changes the color of the bracketed text.");
 	g_MiscColor = CreateConVar("sm_roundinfo_mcolor", "olive", "Changes the color of scores, timeleft, and round number.");
+
+	RegAdminCmd("sm_roundinfo_test", Test_Output, ADMFLAG_GENERIC, "Tests the output of the output of the plugin to test colors, etc.");
 
 	HookEvent("teamplay_round_start", Event_RoundStart);
 }
@@ -85,7 +85,7 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 		char bcolor[128];
 		g_BracketColor.GetString(bcolor, sizeof(bcolor));
 		char mcolor[128];
-		g_MiscColor.GetString(mcolor, sizeof(bcolor));
+		g_MiscColor.GetString(mcolor, sizeof(mcolor));
 
 		//Print Round Info
 		//CPrintToChatAll("{mediumpurple}[Quindali Pugs]{default} Current score: {blue}%s{default} %i, {red}%s{default} %i.", bluName, GetTeamScore(BLU_ID), redName, GetTeamScore(RED_ID));
@@ -114,6 +114,36 @@ public void OnMapStart() {
 	//yeet
 	roundLive = false;
 	currentRound = 0;
+}
+
+/* Test_Output()
+ * 
+ * Called when `sm_roundinfo_test` is run in console
+ * Outputs dummy info to test visuals
+ *
+ */
+public Action Test_Output(int client, int args) {
+	//yeeet
+	if(roundLive) {
+		//inneryeet
+		CPrintToChat(client, "Round is live! Should you really be doing this right now?");
+
+		return Plugin_Handled;
+	}
+
+	//Get cvar values
+	char btext[128];
+	g_BracketText.GetString(btext, sizeof(btext));
+	char bcolor[128];
+	g_BracketColor.GetString(bcolor, sizeof(bcolor));
+	char mcolor[128];
+	g_MiscColor.GetString(mcolor, sizeof(mcolor));
+
+	CPrintToChat(client, "{%s}[%s]{default} Current score: {blue}BLU{default} {%s}4{default}, {red}RED{default} {%s}3{default}.", bcolor, btext, mcolor, mcolor);
+	CPrintToChat(client, "{%s}[%s]{default} {%s}13:37{default} remaining; starting round {%s}8{default}.", bcolor, btext, mcolor, mcolor);
+
+	return Plugin_Handled;
+	
 }
 
 /* GetTimeLeft()
