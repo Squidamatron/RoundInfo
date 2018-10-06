@@ -46,7 +46,7 @@ public void OnPluginStart() {
 	g_BracketColor = CreateConVar("sm_roundinfo_bcolor", "green", "Changes the color of the bracketed text.");
 	g_MiscColor = CreateConVar("sm_roundinfo_mcolor", "olive", "Changes the color of scores, timeleft, and round number.");
 
-	RegAdminCmd("sm_roundinfo_test", Test_Output, ADMFLAG_GENERIC, "Tests the output of the output of the plugin to test colors, etc.");
+	RegAdminCmd("sm_roundinfo_test", Test_Output, ADMFLAG_GENERIC, "Tests the output of the plugin to test colors, etc.");
 	RegAdminCmd("sm_roundinfo_rc", Console_Output, ADMFLAG_GENERIC, "Prints round info in the console; for use with rcon.");
 
 	HookEvent("teamplay_round_start", Event_RoundStart);
