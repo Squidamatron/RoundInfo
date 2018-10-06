@@ -47,6 +47,7 @@ public void OnPluginStart() {
 	g_MiscColor = CreateConVar("sm_roundinfo_mcolor", "olive", "Changes the color of scores, timeleft, and round number.");
 
 	RegAdminCmd("sm_roundinfo_test", Test_Output, ADMFLAG_GENERIC, "Tests the output of the output of the plugin to test colors, etc.");
+	RegAdminCmd("sm_roundinfo_rc", Console_Output, ADMFLAG_GENERIC, "Prints round info in the console; for use with rcon.");
 
 	HookEvent("teamplay_round_start", Event_RoundStart);
 }
@@ -144,6 +145,27 @@ public Action Test_Output(int client, int args) {
 
 	return Plugin_Handled;
 	
+}
+
+/* Console_Output()
+ *
+ * Called when `sm_roundinfo_rc` is run in console
+ * Puts score and timeleft into console for rcon and whatnot
+ *
+ */
+public Action Console_Output(int client, int args) {
+	//yeet
+	if(roundLive) {
+		//inneryeet
+		int timeleft = RoundToFloor(GetTimeLeft());
+		PrintToConsole(client, "RED: %s", GetTeamScore(RED_ID));
+		PrintToConsole(client, "BLU: %s", GetTeamScore(BLU_ID));
+		PrintToConsole(client, "Time: %i:%02", timeleft / 60, timeleft % 60);
+		return Plugin_Handled;
+	}
+	
+	PrintToConsole(client, "Game hasn't started yet.");
+	return Plugin_Handled;
 }
 
 /* GetTimeLeft()
