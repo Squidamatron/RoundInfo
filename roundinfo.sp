@@ -158,9 +158,9 @@ public Action Console_Output(int client, int args) {
 	if(roundLive) {
 		//inneryeet
 		int timeleft = RoundToFloor(GetTimeLeft());
-		PrintToConsole(client, "RED: %s", GetTeamScore(RED_ID));
-		PrintToConsole(client, "BLU: %s", GetTeamScore(BLU_ID));
-		PrintToConsole(client, "Time: %i:%02", timeleft / 60, timeleft % 60);
+		PrintToConsole(client, "RED: %i", GetTeamScore(RED_ID));
+		PrintToConsole(client, "BLU: %i", GetTeamScore(BLU_ID));
+		PrintToConsole(client, "Time: %i:%02i", timeleft / 60, timeleft % 60);
 		return Plugin_Handled;
 	}
 	
