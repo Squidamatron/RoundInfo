@@ -25,6 +25,7 @@ ConVar g_TimeLimit;
 ConVar g_BracketText;
 ConVar g_BracketColor;
 ConVar g_MiscColor;
+ConVar g_TextEnable;
 bool roundLive = false;
 int currentRound = 0;
 
@@ -45,6 +46,7 @@ public void OnPluginStart() {
 	g_BracketText = CreateConVar("sm_roundinfo_btext", "Round Info", "Overrides the plugin name in the bracketed text.");
 	g_BracketColor = CreateConVar("sm_roundinfo_bcolor", "green", "Changes the color of the bracketed text.");
 	g_MiscColor = CreateConVar("sm_roundinfo_mcolor", "olive", "Changes the color of scores, timeleft, and round number.");
+	g_TextEnable = CreateConVar("sm_roundinfo_enable", "1", "Enables/Disables the text output.", FCVAR_NONE, true, 0.0, true, 1.0);
 
 	RegAdminCmd("sm_roundinfo_test", Test_Output, ADMFLAG_GENERIC, "Tests the output of the plugin to test colors, etc.");
 	RegAdminCmd("sm_roundinfo_rc", Console_Output, ADMFLAG_GENERIC, "Prints round info in the console; for use with rcon.");
@@ -72,7 +74,7 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 	}
 
 	//TODO Modularize most of the text? (More cvars?)
-	if (roundLive) {
+	if (roundLive && g_TextEnable) {
 		//inner yeet
 		//Get Team Names
 		char redName[256];
@@ -89,7 +91,6 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 		g_MiscColor.GetString(mcolor, sizeof(mcolor));
 
 		//Print Round Info
-		//CPrintToChatAll("{mediumpurple}[Quindali Pugs]{default} Current score: {blue}%s{default} %i, {red}%s{default} %i.", bluName, GetTeamScore(BLU_ID), redName, GetTeamScore(RED_ID));
 		CPrintToChatAll("{%s}[%s]{default} Current score: {blue}%s{default} {%s}%i{default}, {red}%s{default} {%s}%i{default}.", bcolor, btext, bluName, mcolor, GetTeamScore(BLU_ID), redName, mcolor, GetTeamScore(RED_ID));
 
 		//Print Timeleft and Round number IF NOT KOTH
@@ -98,7 +99,6 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 		int timeleft = RoundToFloor(GetTimeLeft());
 		if (g_TimeLimit.IntValue != 0) {
 			//double inner yeet
-			//CPrintToChatAll("{mediumpurple}[Quindali Pugs]{default} %i:%02i remaining; starting round %i.", timeleft / 60, timeleft % 60, currentRound);
 			CPrintToChatAll("{%s}[%s]{default} {%s}%i:%02i{default} remaining; starting round {%s}%i{default}.", bcolor, btext, mcolor, timeleft / 60, timeleft % 60, mcolor, currentRound);
 		}
 	}
@@ -158,8 +158,8 @@ public Action Console_Output(int client, int args) {
 	if(roundLive) {
 		//inneryeet
 		int timeleft = RoundToFloor(GetTimeLeft());
-		PrintToConsole(client, "RED: %i", GetTeamScore(RED_ID));
 		PrintToConsole(client, "BLU: %i", GetTeamScore(BLU_ID));
+		PrintToConsole(client, "RED: %i", GetTeamScore(RED_ID));
 		PrintToConsole(client, "Time: %i:%02i", timeleft / 60, timeleft % 60);
 		return Plugin_Handled;
 	}
