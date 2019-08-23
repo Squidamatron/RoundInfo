@@ -26,8 +26,11 @@ ConVar g_BracketText;
 ConVar g_BracketColor;
 ConVar g_MiscColor;
 ConVar g_TextEnable;
+
 bool roundLive = false;
 int currentRound = 0;
+bool gameOver = false;
+int endTime = 0;
 
 /* OnPluginStart()
  * 
@@ -52,6 +55,8 @@ public void OnPluginStart() {
 	RegAdminCmd("sm_roundinfo_rc", Console_Output, ADMFLAG_GENERIC, "Prints round info in the console; for use with rcon.");
 
 	HookEvent("teamplay_round_start", Event_RoundStart);
+	HookEvent("teamplay_game_over", Event_GameOver);
+	HookEvent("tf_game_over", Event_GameOver);
 }
 
 /* Event_RoundStart()
@@ -66,15 +71,18 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 	new redReady = GameRules_GetProp("m_bTeamReady", 1, RED_ID);
 	new bluReady = GameRules_GetProp("m_bTeamReady", 1, BLU_ID);
 
-	//Check if both teams are ready AND tournament mod is active
+	//Check if both teams are ready AND tournament mode is active
 	//before putting any text into chat
 	if (bluReady && redReady && g_Tournament) {
 		roundLive = true;
 		currentRound = 0;
+
+		//Set gameOver to false incase another game started on the same map
+		gameOver = false;
 	}
 
 	//TODO Modularize most of the text? (More cvars?)
-	if (roundLive && g_TextEnable) {
+	if (roundLive == true) {
 		//inner yeet
 		//Get Team Names
 		char redName[256];
@@ -90,18 +98,35 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 		char mcolor[128];
 		g_MiscColor.GetString(mcolor, sizeof(mcolor));
 
-		//Print Round Info
-		CPrintToChatAll("{%s}[%s]{default} Current score: {blue}%s{default} {%s}%i{default}, {red}%s{default} {%s}%i{default}.", bcolor, btext, bluName, mcolor, GetTeamScore(BLU_ID), redName, mcolor, GetTeamScore(RED_ID));
-
-		//Print Timeleft and Round number IF NOT KOTH
-		//TODO Current Round visible if KOTH?
 		currentRound++;
-		int timeleft = RoundToFloor(GetTimeLeft());
-		if (g_TimeLimit.IntValue != 0) {
-			//double inner yeet
-			CPrintToChatAll("{%s}[%s]{default} {%s}%i:%02i{default} remaining; starting round {%s}%i{default}.", bcolor, btext, mcolor, timeleft / 60, timeleft % 60, mcolor, currentRound);
+		if(g_TextEnable.IntValue == 1) {
+			//Print Round Info
+			CPrintToChatAll("{%s}[%s]{default} Current score: {blue}%s{default} {%s}%i{default}, {red}%s{default} {%s}%i{default}.", bcolor, btext, bluName, mcolor, GetTeamScore(BLU_ID), redName, mcolor, GetTeamScore(RED_ID));
+
+			//Print Timeleft and Round number IF NOT KOTH
+			//TODO Current Round visible if KOTH?
+			int timeleft = RoundToFloor(GetTimeLeft());
+			if (g_TimeLimit.IntValue != 0) {
+				//double inner yeet
+				CPrintToChatAll("{%s}[%s]{default} {%s}%i:%02i{default} remaining; starting round {%s}%i{default}.", bcolor, btext, mcolor, timeleft / 60, timeleft % 60, mcolor, currentRound);
+			}
 		}
 	}
+}
+
+/* Event_GameOver()
+ *
+ * Called when the game ends (timelimit/score)
+ * Sets up variables for console use
+ *
+ */
+public void Event_GameOver(Event event, const char[] name, bool dontBroadcast) {
+	//yeet
+	//Literally
+	gameOver = true;
+	roundLive = false;
+	endTime = RoundToFloor(GetTimeLeft());
+	//TODO Add end of game summary?
 }
 
 /* OnMapStart()
@@ -115,6 +140,7 @@ public void OnMapStart() {
 	//yeet
 	roundLive = false;
 	currentRound = 0;
+	gameOver = false;
 }
 
 /* Test_Output()
@@ -150,12 +176,13 @@ public Action Test_Output(int client, int args) {
 /* Console_Output()
  *
  * Called when `sm_roundinfo_rc` is run in console
- * Puts score and timeleft into console for rcon and whatnot
+ * Puts score and timeleft in console for rcon and
+ * can tell if the game ended
  *
  */
 public Action Console_Output(int client, int args) {
 	//yeet
-	if(roundLive) {
+	if(roundLive == true && gameOver == false) {
 		//inneryeet
 		int timeleft = RoundToFloor(GetTimeLeft());
 		PrintToConsole(client, "BLU: %i", GetTeamScore(BLU_ID));
@@ -163,8 +190,19 @@ public Action Console_Output(int client, int args) {
 		PrintToConsole(client, "Time: %i:%02i", timeleft / 60, timeleft % 60);
 		return Plugin_Handled;
 	}
-	
-	PrintToConsole(client, "Game hasn't started yet.");
+	else if(roundLive == false && gameOver == true) {
+		//inneryeet
+		PrintToConsole(client, "Game ended! With a time of %i:%02i remaining, the scores were:", endTime / 60, endTime % 60);
+		PrintToConsole(client, "BLU: %i", GetTeamScore(BLU_ID));
+		PrintToConsole(client, "RED: %i", GetTeamScore(RED_ID));
+		return Plugin_Handled;
+	}
+	else if(roundLive == false && gameOver == false) {
+		PrintToConsole(client, "Game hasn't started yet.");
+		return Plugin_Handled;
+	}
+	//STOP YELLING AT ME, SPCOMP!
+	PrintToConsole(client, "If you're seeing THIS message, something has gone horribly wrong.");
 	return Plugin_Handled;
 }
 
